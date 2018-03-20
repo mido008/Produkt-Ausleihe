@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import buttonHandlers.Helpers;
 import client.Client;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -28,6 +29,7 @@ import product.Status;
 public class RentOverview {
 
 	MainContainer mainContainer;
+	public ProductOverView productListView;
 	
 	Label title;
 	TextField searchFilter;
@@ -35,9 +37,12 @@ public class RentOverview {
 	ChoiceBox<Status> statusFilter;
 	public GridPane clientContainer ;
 	public GridPane productsContainer ;
+	public GridPane totalPreisContainer;
 	Button selectClient;
 	Button addProduct;
 	HBox footer;
+	Float totalPreis;
+	Label totalPreisLabel = new Label();
 	
 	Label clientLabel = new Label();
 	
@@ -48,18 +53,25 @@ public class RentOverview {
 	private FilteredList<Client> filteredClientList = new FilteredList<>(this.clientList, client -> true);
 	
 	public ObservableList<ProductDetails> productList = FXCollections.observableArrayList();
-	private FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
+	public FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
 	
 	
 	public RentOverview(MainContainer mainContainer)
 	{
 		this.mainContainer = mainContainer;
+		try {
+			productListView = new ProductOverView();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		this.selectClient = new Button("Kunde auswählen");
 		this.addProduct = new Button("Produkt hinzufügen");
+		this.computeTotalPreis();
 		this.initSelectButtonsAction();
 		this.buildTitle();
 		this.buildClientContainer();
 		this.buildProductsContainer();
+		this.buildTotalPreisContainer();
 		this.buildFooter();
 	}
 	
@@ -181,16 +193,58 @@ public class RentOverview {
 		
 	}
 	
+	public void buildTotalPreisContainer()
+	{
+		this.totalPreisContainer = new GridPane( );
+		Label totalLabel = new Label("Total");
+		totalLabel.getStyleClass().addAll("size-18","text-white");
+		Label separator = new Label(":");
+		separator.getStyleClass().addAll("size-18","text-white");
+		Label prefix = new Label(" €");
+		prefix.getStyleClass().addAll("size-18","text-white");
+		this.totalPreisLabel.setText(this.totalPreis.toString());
+		this.totalPreisLabel.getStyleClass().addAll("size-18","text-white");
+		
+		ColumnConstraints col1 = new ColumnConstraints();
+		col1.setPercentWidth(80);
+		ColumnConstraints col2 = new ColumnConstraints();
+		col2.setPercentWidth(5);
+		ColumnConstraints col3 = new ColumnConstraints();
+		col3.setPercentWidth(10);
+		ColumnConstraints col4 = new ColumnConstraints();
+		col4.setPercentWidth(5);
+		
+		this.totalPreisContainer.getColumnConstraints().addAll(col1, col2, col3);
+		this.totalPreisContainer.setHgap(5);
+		this.totalPreisContainer.setVgap(5);
+		
+		GridPane.setHalignment(totalLabel, HPos.RIGHT);
+		this.totalPreisContainer.add(totalLabel, 0, 0, 1, 1);
+		this.totalPreisContainer.add(separator, 1, 0, 1, 1);
+		this.totalPreisContainer.add(this.totalPreisLabel, 2, 0, 1, 1);
+		this.totalPreisContainer.add(prefix, 3, 0, 1, 1);
+
+	}
+	
 	public void buildFooter()
 	{
 		Button invoiceBt = new Button("Quittung erstellen");
-		
+		invoiceBt.disableProperty().bind(Bindings.or(Bindings.size(this.productList).isEqualTo(0), Bindings.size(this.clientList).isEqualTo(0)));
 		invoiceBt.getStyleClass().addAll("btn", "spacing-15");
 		
-		//Helpers.createInvoice(newProductBt, mainContainer);
+		Helpers.createInvoice(invoiceBt, this);
 		
 		this.footer = new HBox(invoiceBt);
 		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
+	}
+	
+	public void computeTotalPreis()
+	{
+		this.totalPreis = (float) 0;
+		this.productList.forEach(item -> {
+			this.totalPreis += item.calculateTotal();
+		});
+		this.buildTotalPreisContainer();
 	}
 	
 	public void rebuildView()
@@ -206,8 +260,9 @@ public class RentOverview {
 		RowConstraints row2 = new RowConstraints();
 		RowConstraints row3 = new RowConstraints();
 		RowConstraints row4 = new RowConstraints();
-		row4.setPercentHeight(10);
-		gPane.getRowConstraints().addAll(row1, row2, row3, row4);
+		RowConstraints row5 = new RowConstraints();
+		row5.setPercentHeight(10);
+		gPane.getRowConstraints().addAll(row1, row2, row3, row4, row5);
 		gPane.setHgap(5);
 		gPane.setVgap(5);
 		
@@ -215,7 +270,9 @@ public class RentOverview {
 		gPane.add(this.title, 0, 0);
 		gPane.add(this.clientContainer, 0, 1);
 		gPane.add(this.productsContainer, 0, 2);
-		gPane.add(this.footer, 0, 3);
+		GridPane.setHalignment(this.totalPreisContainer, HPos.RIGHT);
+		gPane.add(this.totalPreisContainer, 0, 3);
+		gPane.add(this.footer, 0, 4);
 
 		return new Group(gPane);
 	}

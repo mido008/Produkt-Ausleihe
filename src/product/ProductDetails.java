@@ -1,5 +1,8 @@
 package product;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -123,6 +126,19 @@ public class ProductDetails {
 	
 	public void setPeriode(int periode) {
 		this.priode.setValue(periode);
+	}
+	
+	public void computePeriode()
+	{
+		LocalDate fromDate =  LocalDate.parse(this.getDatefrom());
+		LocalDate fromTo = LocalDate.parse(this.getDateto());
+		int dateDiff = (int) ChronoUnit.DAYS.between(fromDate, fromTo);
+		this.priode.setValue(dateDiff);
+	}
+	
+	public float calculateTotal()
+	{
+		return this.getPeriode() * this.getPreis();
 	}
 	
 	public String parseProduktToDb()
