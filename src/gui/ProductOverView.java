@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import buttonHandlers.Helpers;
 import client.Client;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -45,8 +46,8 @@ public class ProductOverView {
 	GridPane filterContainer;
 	HBox footer;
 	
-	DatePicker dateFrom = new DatePicker();
-	DatePicker dateTo = new DatePicker();
+	public DatePicker dateFrom = new DatePicker();
+	public DatePicker dateTo = new DatePicker();
 	
 	
 	public TableView<ProductDetails> tableView = new TableView<ProductDetails>();
@@ -214,6 +215,9 @@ public class ProductOverView {
 		Button editProductBt = new Button("Bearbeiten");
 		Button removeProductBt = new Button("Löschen");
 		
+		editProductBt.disableProperty().bind(Bindings.isEmpty(this.tableView.selectionModelProperty().get().getSelectedCells()));
+		removeProductBt.disableProperty().bind(Bindings.isEmpty(this.tableView.selectionModelProperty().get().getSelectedCells()));
+		
 		newProductBt.getStyleClass().addAll("btn", "spacing-15");
 		editProductBt.getStyleClass().addAll("btn", "spacing-15");
 		removeProductBt.getStyleClass().addAll("btn", "spacing-15");
@@ -248,8 +252,15 @@ public class ProductOverView {
 		return new Group(gPane);
 	}
 	
-	public Group getProductViewForSelectTableView()
+	public Group getProductViewForSelectTableView(FilteredList<ProductDetails> itemsToexlude)
 	{
+		this.filteredProductList.setPredicate(product -> {
+			if(product.getStatus().toLowerCase().equals("verfügbar")){
+				return true;
+			}
+			return false;
+		});
+		
 		GridPane gPane = new GridPane();
 		RowConstraints row1 = new RowConstraints();
 		row1.setPercentHeight(10);
@@ -277,21 +288,32 @@ public class ProductOverView {
 	public Group getProductSetDatumView()
 	{
 		Label title = new Label("Datum");
+		Label fromLabel = new Label("Leihdatum");
+		Label toLabel = new Label("Rückgabedatum");
+		Label separator1 = new Label(":");
+		Label separator2 = new Label(":");
 		GridPane gPane = new GridPane();
 		ColumnConstraints col1 = new ColumnConstraints();
 		col1.setPercentWidth(30);
 		ColumnConstraints col2 = new ColumnConstraints();
-		col2.setPercentWidth(30);
+		col2.setPercentWidth(5);
+		ColumnConstraints col3 = new ColumnConstraints();
+		col3.setPercentWidth(30);
 		
-		gPane.getColumnConstraints().addAll(col1, col2);
+		gPane.getColumnConstraints().addAll(col1, col2, col3);
 		gPane.setHgap(5);
 		gPane.setVgap(5);
 		
 		GridPane.setHalignment(title, HPos.CENTER);
-		gPane.add(title, 0, 0, 2, 1);
-		gPane.add(this.dateFrom, 0, 1, 1, 1);
-		gPane.add(this.dateTo, 0, 2, 1, 1);
-
+		gPane.add(title, 0, 0, 3, 1);
+		
+		gPane.add(fromLabel, 0, 1, 1, 1);
+		gPane.add(separator1, 1, 1, 1, 1);
+		gPane.add(this.dateFrom, 2, 1, 1, 1);
+		
+		gPane.add(toLabel, 0, 2, 1, 1);
+		gPane.add(separator2, 1, 2, 1, 1);
+		gPane.add(this.dateTo, 2, 2, 1, 1);
 		return new Group(gPane);
 	}
 	

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import buttonHandlers.Helpers;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -127,6 +128,10 @@ public class ClientOverView {
 		Button newClientBt = new Button("Neuer Kunde");
 		Button editClientBt = new Button("Bearbeiten");
 		Button removeClientBt = new Button("Löschen");
+		
+		editClientBt.disableProperty().bind(Bindings.isEmpty(this.tableView.selectionModelProperty().get().getSelectedCells()));
+		removeClientBt.disableProperty().bind(Bindings.isEmpty(this.tableView.selectionModelProperty().get().getSelectedCells()));
+		
 		
 		newClientBt.getStyleClass().addAll("btn", "spacing-15");
 		editClientBt.getStyleClass().addAll("btn", "spacing-15");

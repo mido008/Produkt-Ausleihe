@@ -13,13 +13,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.StageStyle;
 import main.Leihaus;
 import product.ProductDetails;
 
 public class Helpers {
 
 	private static  Alert warningAlert = new Alert(AlertType.WARNING);
-	private static Alert confirmtionAlert = new Alert(AlertType.CONFIRMATION);
+	private static Alert confirmtionAlert;
 	
 	public static void addClient(Button bt, MainContainer mainContainer)
 	{
@@ -34,6 +35,7 @@ public class Helpers {
 			Client client = (Client) clView.tableView.getSelectionModel().getSelectedItem();
 			
 			if(client == null) {
+				warningAlert = new Alert(AlertType.WARNING);
 				warningAlert.setHeaderText("Wählen Sie bitte einen Kunden aus!");
 				Optional<ButtonType> option = warningAlert.showAndWait();
 			} else {
@@ -48,11 +50,13 @@ public class Helpers {
 			Client client = (Client) clView.tableView.getSelectionModel().getSelectedItem();
 			
 			if(client == null) {
+				warningAlert = new Alert(AlertType.WARNING);
 				warningAlert.setHeaderText("Wählen Sie bitte einen Kunden aus!");
 				Optional<ButtonType> option = warningAlert.showAndWait();
 				
 			} else {
 				String fullname = client.getFirstname() + " " + client.getLastname();
+				confirmtionAlert = new Alert(AlertType.CONFIRMATION);
 				confirmtionAlert.setTitle("Kunde löschen");
 				confirmtionAlert.setHeaderText("Möchten Sie den Kunden " + fullname + " wirklich löschen ?");
 				Optional<ButtonType> option = confirmtionAlert.showAndWait();
@@ -81,6 +85,7 @@ public class Helpers {
 		bt.setOnAction(action -> {
 			ProductDetails product = (ProductDetails) productView.tableView.getSelectionModel().getSelectedItem();
 			if(product == null) {
+				warningAlert = new Alert(AlertType.WARNING);
 				warningAlert.setHeaderText("Wählen Sie bitte ein Produkt aus!");
 				Optional<ButtonType> option = warningAlert.showAndWait();
 			} else {
@@ -96,10 +101,12 @@ public class Helpers {
 			ProductDetails product = (ProductDetails) productView.tableView.getSelectionModel().getSelectedItem();
 			
 			if(product == null) {
+				warningAlert = new Alert(AlertType.WARNING);
 				warningAlert.setHeaderText("Wählen Sie bitte ein Produkt aus!");
 				Optional<ButtonType> option = warningAlert.showAndWait();
 			} else {
 				String productname = product.getProductname();
+				confirmtionAlert = new Alert(AlertType.CONFIRMATION);
 				confirmtionAlert.setTitle("Kunde löschen");
 				confirmtionAlert.setHeaderText("Möchten Sie das Produkt " + productname + " wirklich löschen ?");
 				Optional<ButtonType> option = confirmtionAlert.showAndWait();
@@ -122,6 +129,7 @@ public class Helpers {
 		bt.setOnAction(action-> {
 			try {
 				ClientOverView clientList = new ClientOverView();
+				confirmtionAlert = new Alert(AlertType.CONFIRMATION);
 				confirmtionAlert.setHeaderText("");
 				confirmtionAlert.getDialogPane().setContent(clientList.getClientViewForSelectTableView());
 				
@@ -153,23 +161,37 @@ public class Helpers {
 	{
 		bt.setOnAction(action-> {
 			try {
-				ProductOverView productList = new ProductOverView();
+				confirmtionAlert = new Alert(AlertType.CONFIRMATION);
 				confirmtionAlert.setHeaderText("");
-				confirmtionAlert.getDialogPane().setContent(productList.getProductViewForSelectTableView());
+				confirmtionAlert.getDialogPane().setContent(rentOverview.productListView.getProductViewForSelectTableView(rentOverview.filteredProductList));
 				
 				Optional<ButtonType> option = confirmtionAlert.showAndWait();
 				
 				if(option.get() == ButtonType.OK) {
-						ProductDetails selectedProduct = productList.tableView.getSelectionModel().getSelectedItem();
-						confirmtionAlert.setHeaderText("");
-						confirmtionAlert.getDialogPane().setContent(productList.getProductSetDatumView());
-						Optional<ButtonType> option2 = confirmtionAlert.showAndWait();
-						if(option2.get() == ButtonType.OK) {
-							System.out.println("yyyyyyyy");
+						ProductDetails selectedProduct = rentOverview.productListView.tableView.getSelectionModel().getSelectedItem();
+						if(selectedProduct != null) {
+							rentOverview.productListView.productList.remove(selectedProduct);
+							confirmtionAlert = new Alert(AlertType.CONFIRMATION);
+							confirmtionAlert.setHeaderText("");
+							confirmtionAlert.getDialogPane().setContent(rentOverview.productListView.getProductSetDatumView());
+							/*
+						confirmtionAlert.initStyle(StageStyle.UNDECORATED);;
+						confirmtionAlert.getDialogPane().getChildren().removeIf(item->{
+							System.out.println(item.getId());
+							return false;
+						});
+							 */
+							Optional<ButtonType> option2 = confirmtionAlert.showAndWait();
+							if(option2.get() == ButtonType.OK) {
+								selectedProduct.setDatefrom(rentOverview.productListView.dateFrom.getValue().toString());
+								selectedProduct.setDateto(rentOverview.productListView.dateTo.getValue().toString());
+								selectedProduct.computePeriode();
+								rentOverview.productList.add(selectedProduct);
+								rentOverview.computeTotalPreis();
+								rentOverview.rebuildView();
+							}
+							//rentOverview.buildProductsContainer();
 						}
-						rentOverview.productList.add(selectedProduct);
-						//rentOverview.buildProductsContainer();
-						//rentOverview.rebuildView();
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -178,4 +200,10 @@ public class Helpers {
 		});
 	}
 	
+	public static void createInvoice(Button bt, RentOverview rentOverview)
+	{
+		bt.setOnAction(action-> {
+		
+		});
+	}
 }
