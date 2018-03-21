@@ -244,7 +244,6 @@ public class Helpers {
 						returnOverView.buildClientLabel();
 						returnOverView.buildClientContainer();
 						returnOverView.rebuildView();
-						System.out.println(selectedClient.getFirstname());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import main.Leihaus;
 
 
 public class LeftMenu {
@@ -47,17 +48,13 @@ public class LeftMenu {
 	public void initOverViewBtHandle(MainContainer relatedContainer)
 	{
 		this.overViewBt.setOnAction(action -> {
-			/*
-			overView clientOverView;
+			OverView overView;
 			try {
-				clientOverView = new ClientOverView(relatedContainer);
-				relatedContainer.setContent(clientOverView.getView());
-			} catch (SQLException e) {
-				e.printStackTrace();
+				overView = new OverView(relatedContainer);
+				relatedContainer.setContent(overView.getView());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			 */
 		});
 	}
 	

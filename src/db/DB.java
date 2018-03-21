@@ -11,7 +11,6 @@ import client.Client;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import product.Category;
-import product.Product;
 import product.ProductDetails;
 import product.Rent;
 
@@ -292,10 +291,7 @@ public class DB {
 			@Override
 			public void queryCallback() throws SQLException {
 				ResultSet rents = statement.executeQuery("select * from rents r LEFT JOIN products p ON r.p_id = p.id AND status = 'ausgeliehen' WHERE c_id = "+ client.getId());
-				//ResultSet rents = statement.executeQuery("select * from rents,products WHERE c_id = "+ client.getId());
-				System.out.println("------");
 				while(rents.next()) {
-					System.out.println("------");
 					ProductDetails rent = new ProductDetails();
 					rent.setRentId(rents.getInt("id"));
 					rent.setCid(rents.getInt("c_id"));
@@ -312,6 +308,37 @@ public class DB {
 		
 		return rentedProducts;
 	}
+	
+	/******************************************************************************/
+
+	public ArrayList<Rent> getRentList() throws SQLException, Exception
+	{
+		ArrayList<Rent> rentList = new ArrayList<Rent>();
+		this.prepareStatement(new Callback() {
+			@Override
+			public void queryCallback() throws SQLException {
+				ResultSet rents = statement.executeQuery("select * from rents r LEFT JOIN products p ON r.p_id = p.id AND status = 'ausgeliehen' LEFT JOIN clients c ON r.c_id = c.id");
+				while(rents.next()) {
+					Rent rent = new Rent();
+					rent.setRentId(rents.getInt("id"));
+					rent.setCid(rents.getInt("c_id"));
+					rent.setProductId(rents.getInt("p_id"));
+					rent.setPreis(rents.getFloat("preis"));
+					rent.setClientname(rents.getString("firstname") + ", " + rents.getString("lastname"));
+					rent.setProductname(rents.getString("label"));
+					rent.setDatefrom(rents.getString("date_from"));
+					rent.setDateto(rents.getString("date_to"));
+					rent.computePeriode();
+					rentList.add(rent);
+				}
+			};
+		});
+		
+		return rentList;
+	}
+	/****************** Return Queries *****************/
+	
+	
 	
 	/******************************************************************************/
 

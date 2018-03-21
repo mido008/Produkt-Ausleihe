@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public class ProductDetails {
 
 	protected SimpleStringProperty productName;
+	protected SimpleStringProperty clientName;
 	protected SimpleObjectProperty<Category> productCategory;
 	protected SimpleFloatProperty preis;
 	protected SimpleIntegerProperty rentId;
@@ -23,6 +24,7 @@ public class ProductDetails {
 	
 	public ProductDetails() {
 		this.productName = new SimpleStringProperty();
+		this.clientName = new SimpleStringProperty();
 		this.productCategory = new SimpleObjectProperty<Category>();
 		this.preis = new SimpleFloatProperty();
 		this.cId = new SimpleIntegerProperty();
@@ -43,6 +45,7 @@ public class ProductDetails {
 	{
 		this.productName.setValue(name);
 	}
+	
 	
 	public Category getCategory() {
 		return this.productCategory.get();

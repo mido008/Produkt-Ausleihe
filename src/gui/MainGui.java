@@ -19,10 +19,11 @@ public class MainGui{
 
 		final MainContainer mainContainer = new MainContainer();
 		final LeftMenu leftMenu = new LeftMenu(mainContainer);
+		OverView overView = new OverView(mainContainer);
 		ClientOverView clientOverView = new ClientOverView(mainContainer);
 		ProductOverView productOverview= new ProductOverView(mainContainer);
 		
-		mainContainer.setContent(clientOverView.getView());
+		mainContainer.setContent(overView.getView());
 		
 		final HBox parentContainer = new HBox(leftMenu.getLeftMenu(), mainContainer.getMainContainer());
 		

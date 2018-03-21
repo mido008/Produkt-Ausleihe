@@ -13,7 +13,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import main.Leihaus;
 import product.Category;
-import product.Product;
 import product.ProductDetails;
 
 public class UpdateProductView {
@@ -28,7 +27,7 @@ public class UpdateProductView {
 	ChoiceBox<Category> category;
 	
 	public UpdateProductView(MainContainer mainContainer){
-		this.product = new Product();
+		this.product = new ProductDetails();
 		this.initView(mainContainer);
 	}
 	

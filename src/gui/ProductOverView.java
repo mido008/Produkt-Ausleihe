@@ -31,7 +31,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import main.Leihaus;
 import product.Category;
-import product.Product;
 import product.ProductDetails;
 import product.Rent;
 import product.Status;
