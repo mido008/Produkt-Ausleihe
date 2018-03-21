@@ -1,8 +1,9 @@
 package client;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 public class Client {
-	private SimpleStringProperty id;
+	private SimpleIntegerProperty id;
 	private SimpleStringProperty firstname;
 	private SimpleStringProperty lastname;
 	private SimpleStringProperty address;
@@ -11,7 +12,7 @@ public class Client {
 	private SimpleStringProperty tel;
 	
 	public Client() {
-		this.id = new SimpleStringProperty();
+		this.id = new SimpleIntegerProperty();
 		this.firstname = new SimpleStringProperty();
 		this.lastname = new SimpleStringProperty();
 		this.address = new SimpleStringProperty();
@@ -19,9 +20,9 @@ public class Client {
 		this.city = new SimpleStringProperty();
 		this.tel = new SimpleStringProperty();
 	}
-	public Client(String id, String firstname, String lastname, String address, String plz, String city, String tel)
+	public Client(int id, String firstname, String lastname, String address, String plz, String city, String tel)
 	{
-		this.id = new SimpleStringProperty(id);
+		this.id = new SimpleIntegerProperty(id);
 		this.firstname = new SimpleStringProperty(firstname);
 		this.lastname = new SimpleStringProperty(lastname);
 		this.address = new SimpleStringProperty(address);
@@ -30,12 +31,12 @@ public class Client {
 		this.tel = new SimpleStringProperty(tel);
 	}
 
-	public String getId()
+	public int getId()
 	{
 		return this.id.get();
 	}
 	
-	public void setId(String id)
+	public void setId(int id)
 	{
 		this.id.setValue(id);
 	}

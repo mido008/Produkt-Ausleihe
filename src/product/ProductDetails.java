@@ -152,8 +152,8 @@ public class ProductDetails {
 	{
 		return 	this.cId.get() + " ,"+
 				this.pId.get() + " ,"+
-				"'"+ this.status.get() + "'"+
-				"'"+ this.dateFrom.get() + "'"+
+				"'"+ this.status.get() + "',"+
+				"'"+ this.dateFrom.get() + "',"+
 				"'"+ this.dateTo.get() + "'";
 	}
 }

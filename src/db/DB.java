@@ -75,6 +75,7 @@ public class DB {
 				//statement.executeUpdate("DROP TABLE IF EXISTS clients");
 				//statement.executeUpdate("DROP TABLE IF EXISTS categories");
 				//statement.executeUpdate("DROP TABLE IF EXISTS products");
+				//statement.executeUpdate("DROP TABLE IF EXISTS rents");
 				
 				statement.executeUpdate("CREATE TABLE IF NOT EXISTS clients (id integer PRIMARY KEY, firstname string, lastname string, address string, plz string, city string, tel string)");
 				statement.executeUpdate("CREATE TABLE IF NOT EXISTS products (id integer PRIMARY KEY, label string, preis numeric, categorie_id integer, FOREIGN KEY (categorie_id) REFERENCES cotegories (id) ON DELETE CASCADE ON UPDATE NO ACTION)");
@@ -94,7 +95,7 @@ public class DB {
 				ResultSet clients =  statement.executeQuery("select * from clients");
 				while(clients.next()) {
 					Client client = new Client();
-					client.setId(clients.getString("id"));
+					client.setId(clients.getInt("id"));
 					client.setFirstname(clients.getString("firstname"));
 					client.setLastname(clients.getString("lastname"));
 					client.setAddress(clients.getString("address"));
@@ -246,13 +247,70 @@ public class DB {
 		});
 	}
 
-	public void removeProduct(ProductDetails product) throws SQLException, Exception {
+	public void removeProduct(ProductDetails product) throws SQLException, Exception 
+	{
 		this.prepareStatement(new Callback() {
 			@Override
 			public void queryCallback() throws SQLException {
 				statement.executeUpdate("DELETE FROM products WHERE id = "+ product.getProductId() +";");
 			};
 		});
+	}
+	
+	/******************************************************************************/
+
+	/****************** Product Queries *****************/
+	
+	public void saveRent(Client client, ObservableList<ProductDetails> productList) throws SQLException, Exception
+	{
+		this.prepareStatement(new Callback() {
+			@Override
+			public void queryCallback() throws SQLException {
+				productList.forEach(product -> {
+					product.setCid(client.getId());
+					product.setStatus("ausgeliehen");
+					String parsedRent = product.parseRentToDb();
+					System.out.println(parsedRent);
+					try {
+						
+						statement.executeUpdate("INSERT INTO rents (c_id, p_id, status, date_from, date_to) values ("+ parsedRent +")");
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				});
+			};
+		});
+	}
+	
+	/******************************************************************************/
+
+	/****************** Return Queries *****************/
+	public ArrayList<ProductDetails> getRentedProductsByClient(Client client) throws SQLException, Exception
+	{
+		ArrayList<ProductDetails> rentedProducts = new ArrayList<ProductDetails>();
+		this.prepareStatement(new Callback() {
+			@Override
+			public void queryCallback() throws SQLException {
+				ResultSet rents = statement.executeQuery("select * from rents r LEFT JOIN products p ON r.p_id = p.id AND status = 'ausgeliehen' WHERE c_id = "+ client.getId());
+				//ResultSet rents = statement.executeQuery("select * from rents,products WHERE c_id = "+ client.getId());
+				System.out.println("------");
+				while(rents.next()) {
+					System.out.println("------");
+					ProductDetails rent = new ProductDetails();
+					rent.setRentId(rents.getInt("id"));
+					rent.setCid(rents.getInt("c_id"));
+					rent.setProductId(rents.getInt("p_id"));
+					rent.setPreis(rents.getFloat("preis"));
+					rent.setProductname(rents.getString("label"));
+					rent.setDatefrom(rents.getString("date_from"));
+					rent.setDateto(rents.getString("date_to"));
+					rent.computePeriode();
+					rentedProducts.add(rent);
+				}
+			};
+		});
+		
+		return rentedProducts;
 	}
 	
 	/******************************************************************************/

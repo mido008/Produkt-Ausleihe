@@ -93,7 +93,7 @@ public class UpdateClientView {
 		cancel.getStyleClass().addAll("btn", "spacing-15");
 		
 		save.setOnAction(action -> {
-			if(this.client.getId() == null || this.client.getId().isEmpty()) {
+			if(this.client.getId() == 0) {
 				try {
 					Leihaus.db.addClient(this.saveClient());
 				} catch (Exception e) {

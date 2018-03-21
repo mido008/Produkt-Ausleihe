@@ -4,9 +4,11 @@ import java.util.Optional;
 
 import client.Client;
 import gui.ClientOverView;
+import gui.InvoiceView;
 import gui.MainContainer;
 import gui.ProductOverView;
 import gui.RentOverview;
+import gui.ReturnOverView;
 import gui.UpdateClientView;
 import gui.UpdateProductView;
 import javafx.scene.control.Alert;
@@ -124,7 +126,7 @@ public class Helpers {
 		});
 	}
 
-	public static void selecClientForRent(Button bt, RentOverview rentOverview)
+	public static void selectClientForRent(Button bt, RentOverview rentOverview)
 	{
 		bt.setOnAction(action-> {
 			try {
@@ -174,14 +176,8 @@ public class Helpers {
 							confirmtionAlert = new Alert(AlertType.CONFIRMATION);
 							confirmtionAlert.setHeaderText("");
 							confirmtionAlert.getDialogPane().setContent(rentOverview.productListView.getProductSetDatumView());
-							/*
-						confirmtionAlert.initStyle(StageStyle.UNDECORATED);;
-						confirmtionAlert.getDialogPane().getChildren().removeIf(item->{
-							System.out.println(item.getId());
-							return false;
-						});
-							 */
 							Optional<ButtonType> option2 = confirmtionAlert.showAndWait();
+							
 							if(option2.get() == ButtonType.OK) {
 								selectedProduct.setDatefrom(rentOverview.productListView.dateFrom.getValue().toString());
 								selectedProduct.setDateto(rentOverview.productListView.dateTo.getValue().toString());
@@ -203,7 +199,62 @@ public class Helpers {
 	public static void createInvoice(Button bt, RentOverview rentOverview)
 	{
 		bt.setOnAction(action-> {
-		
+			try {
+				if(rentOverview.saveBt.isVisible()) {
+					Leihaus.db.saveRent(rentOverview.clientList.get(0), rentOverview.productList);
+				}
+				rentOverview.renderInvoiceView();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 	}
+	
+	public static void saveRent(Button bt, RentOverview rentOverview)
+	{
+		bt.setOnAction(action-> {
+			try {
+				Leihaus.db.saveRent(rentOverview.clientList.get(0), rentOverview.productList);
+				rentOverview.saveBt.visibleProperty().set(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+	
+	
+	public static void selectClientForReturn(Button bt, ReturnOverView returnOverView)
+	{
+		bt.setOnAction(action-> {
+			try {
+				ClientOverView clientList = new ClientOverView();
+				confirmtionAlert = new Alert(AlertType.CONFIRMATION);
+				confirmtionAlert.setHeaderText("");
+				confirmtionAlert.getDialogPane().setContent(clientList.getClientViewForSelectTableView());
+				
+				Optional<ButtonType> option = confirmtionAlert.showAndWait();
+				
+				if(option.get() == ButtonType.OK) {
+					try {
+						Client selectedClient = clientList.tableView.getSelectionModel().getSelectedItem();
+						returnOverView.clientList.clear();
+						returnOverView.clientList.add(selectedClient);
+						returnOverView.productList.clear();
+						returnOverView.productList.addAll(Leihaus.db.getRentedProductsByClient(selectedClient));
+						returnOverView.buildClientLabel();
+						returnOverView.buildClientContainer();
+						returnOverView.rebuildView();
+						System.out.println(selectedClient.getFirstname());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
+		});
+	}
+	
+	
 }

@@ -1,6 +1,5 @@
 package gui;
 
-import java.sql.SQLException;
 
 import buttonHandlers.Helpers;
 import client.Client;
@@ -21,27 +20,20 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
-import main.Leihaus;
 import product.Category;
 import product.ProductDetails;
 import product.Status;
 
-public class RentOverview {
+public class ReturnOverView {
 
 	MainContainer mainContainer;
-	public ProductOverView productListView;
-	
 	Label title;
 	TextField searchFilter;
 	public GridPane clientContainer ;
 	public GridPane productsContainer ;
-	public GridPane totalPreisContainer;
 	Button selectClient;
-	Button addProduct;
-	public Button saveBt;
+	public Button returnProductBt;
 	HBox footer;
-	Float totalPreis;
-	Label totalPreisLabel = new Label();
 	
 	Label clientLabel = new Label();
 	
@@ -49,38 +41,27 @@ public class RentOverview {
 	public TableView<ProductDetails> productsTableView = new TableView<ProductDetails>();
 	
 	public ObservableList<Client> clientList = FXCollections.observableArrayList();
+	private FilteredList<Client> filteredClientList = new FilteredList<>(this.clientList, client -> true);
 	
 	public ObservableList<ProductDetails> productList = FXCollections.observableArrayList();
 	public FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
 	
 	
-	public RentOverview(MainContainer mainContainer)
+	public ReturnOverView(MainContainer mainContainer) 
 	{
 		this.mainContainer = mainContainer;
-		try {
-			productListView = new ProductOverView();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		this.selectClient = new Button("Kunde auswählen");
 		this.selectClient.getStyleClass().addAll("btn", "spacing-15");
-		this.addProduct = new Button("Produkt hinzufügen");
-		this.addProduct.getStyleClass().addAll("btn", "spacing-15");
-		this.saveBt = new Button("Speichern");
-		this.saveBt.getStyleClass().addAll("btn", "spacing-15");
-		this.computeTotalPreis();
 		this.initSelectButtonsAction();
 		this.buildTitle();
 		this.buildClientContainer();
 		this.buildProductsContainer();
-		this.buildTotalPreisContainer();
 		this.buildFooter();
 	}
 	
 	public void initSelectButtonsAction()
 	{
-		Helpers.selectClientForRent(this.selectClient, this);
-		Helpers.selecProductForRent(this.addProduct, this);
+		Helpers.selectClientForReturn(this.selectClient, this);
 	}
 	
 	public void buildTitle()
@@ -145,7 +126,7 @@ public class RentOverview {
 		productsContainer.add(title, 0, 0, 1, 1);
 		productsContainer.add(separator, 1, 0, 1, 1);
 		productsContainer.add(this.productsTableView, 0, 1, 3, 1);
-		productsContainer.add(this.addProduct, 2, 2, 1, 1);
+		this.productsContainer.visibleProperty().bind(Bindings.size(this.clientList).isNotEqualTo(0));
 			
 	}
 	
@@ -173,69 +154,23 @@ public class RentOverview {
 		this.productsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		this.productsTableView.setMaxHeight(250);
 		this.productsTableView.getColumns().addAll(productCol, preisCol, daysCol, dateFromCol, dateToCol);
-		//this.productsTableView.getStyleClass().add("client-over-view");
-		
-	}
-	
-	public void buildTotalPreisContainer()
-	{
-		this.totalPreisContainer = new GridPane( );
-		Label totalLabel = new Label("Total");
-		totalLabel.getStyleClass().addAll("size-18","text-white");
-		Label separator = new Label(":");
-		separator.getStyleClass().addAll("size-18","text-white");
-		Label prefix = new Label(" €");
-		prefix.getStyleClass().addAll("size-18","text-white");
-		this.totalPreisLabel.setText(this.totalPreis.toString());
-		this.totalPreisLabel.getStyleClass().addAll("size-18","text-white");
-		
-		ColumnConstraints col1 = new ColumnConstraints();
-		col1.setPercentWidth(80);
-		ColumnConstraints col2 = new ColumnConstraints();
-		col2.setPercentWidth(5);
-		ColumnConstraints col3 = new ColumnConstraints();
-		col3.setPercentWidth(10);
-		ColumnConstraints col4 = new ColumnConstraints();
-		col4.setPercentWidth(5);
-		
-		this.totalPreisContainer.getColumnConstraints().addAll(col1, col2, col3);
-		this.totalPreisContainer.setHgap(5);
-		this.totalPreisContainer.setVgap(5);
-		
-		GridPane.setHalignment(totalLabel, HPos.RIGHT);
-		this.totalPreisContainer.add(totalLabel, 0, 0, 1, 1);
-		this.totalPreisContainer.add(separator, 1, 0, 1, 1);
-		this.totalPreisContainer.add(this.totalPreisLabel, 2, 0, 1, 1);
-		this.totalPreisContainer.add(prefix, 3, 0, 1, 1);
-
-	}
-	
-	public void buildFooter()
-	{
-		this.saveBt.disableProperty().bind(Bindings.or(Bindings.size(this.productList).isEqualTo(0), Bindings.size(this.clientList).isEqualTo(0)));
-		Button invoiceBt = new Button("Quittung erstellen");
-		invoiceBt.disableProperty().bind(Bindings.or(Bindings.size(this.productList).isEqualTo(0), Bindings.size(this.clientList).isEqualTo(0)));
-		invoiceBt.getStyleClass().addAll("btn", "spacing-15");
-		
-		Helpers.saveRent(this.saveBt, this);
-		Helpers.createInvoice(invoiceBt, this);
-		
-		this.footer = new HBox(this.saveBt, invoiceBt);
-		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
-	}
-	
-	public void computeTotalPreis()
-	{
-		this.totalPreis = (float) 0;
-		this.productList.forEach(item -> {
-			this.totalPreis += item.calculateTotal();
-		});
-		this.buildTotalPreisContainer();
 	}
 	
 	public void rebuildView()
 	{
 		this.mainContainer.setContent(this.getView());
+	}
+	
+	public void buildFooter()
+	{
+		this.returnProductBt = new Button("Rückgeben");
+		this.returnProductBt.getStyleClass().addAll("btn", "spacing-15");
+		
+		//Helpers.createInvoice(invoiceBt, this);
+		
+		this.footer = new HBox(this.returnProductBt);
+		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
+		this.footer.visibleProperty().bind(Bindings.size(this.clientList).isNotEqualTo(0));
 	}
 	
 	public Group getView()
@@ -256,18 +191,9 @@ public class RentOverview {
 		gPane.add(this.title, 0, 0);
 		gPane.add(this.clientContainer, 0, 1);
 		gPane.add(this.productsContainer, 0, 2);
-		GridPane.setHalignment(this.totalPreisContainer, HPos.RIGHT);
-		gPane.add(this.totalPreisContainer, 0, 3);
+		GridPane.setHalignment(this.footer, HPos.CENTER);
 		gPane.add(this.footer, 0, 4);
 
 		return new Group(gPane);
 	}
-	
-	public void renderInvoiceView()
-	{
-		InvoiceView invoiceView = new InvoiceView(this.clientList.get(0), this.productList, this.mainContainer);
-		this.mainContainer.setContent(invoiceView.getView());
-	}
-	
-	
 }
