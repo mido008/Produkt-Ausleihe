@@ -5,12 +5,15 @@ import buttonHandlers.Helpers;
 import client.Client;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.HPos;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -20,6 +23,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import javafx.util.Pair;
 import main.Leihaus;
 import product.Category;
 import product.ProductDetails;
@@ -32,16 +36,17 @@ public class OverView {
 	Label title;
 	TextField searchClientFilter;
 	TextField searchProductFilter;
+
+	public DatePicker dateFrom = new DatePicker();
+	public DatePicker dateTo = new DatePicker();
 	
-	ChoiceBox<Category> categoryFilter;
-	ChoiceBox<Status> statusFilter;
 	public GridPane filterContainer ;
 	public GridPane rentContainer ;
 	Button showDetails;
 	HBox footer;
 
 	public TableView<Rent> rentTableView = new TableView<Rent>();
-	public ObservableList<String> multiFilter = FXCollections.observableArrayList();
+	public ObservableList<Pair<String,String>> multiFilter = FXCollections.observableArrayList();
 	public ObservableList<Rent> rentList = FXCollections.observableArrayList();
 	private FilteredList<Rent> filteredRentList = new FilteredList<>(this.rentList, rent -> true);
 	
@@ -75,17 +80,6 @@ public class OverView {
 		this.searchProductFilter.setPromptText("Produkt suchen ...");
 		this.searchProductFilter.getStyleClass().addAll("filter");
 		
-		this.categoryFilter = new ChoiceBox<Category>();
-		this.categoryFilter.getItems().add(new Category(-1, "Filter Ausblenden"));
-		this.categoryFilter.getItems().addAll(Leihaus.categoriesList);
-		this.categoryFilter.getSelectionModel().select(0);
-		this.categoryFilter.getStyleClass().addAll("filter", "spacing-5");
-		
-		this.statusFilter = new ChoiceBox<Status>();
-		this.statusFilter.getItems().addAll(Leihaus.statusItems);
-		this.statusFilter.getSelectionModel().select(0);
-		this.statusFilter.getStyleClass().addAll("filter", "spacing-5");
-		
 		this.buildFilterHandler();
 		this.buildFiterView();
 	}
@@ -107,19 +101,46 @@ public class OverView {
 		});
 		
 		this.searchProductFilter.textProperty().addListener((observable, oldVal, newVal) -> {
-			this.multiFilter.remove(oldVal);
-			this.multiFilter.add(newVal);
-			//this.filteredRentList.setPredicate(rent -> {
-				//return FilterHelpers.productNameFilter(rent.getProductname(), newVal);
-			//});
+			this.multiFilter.remove(new Pair<String, String>("product",oldVal));
+			this.multiFilter.add(new Pair<String, String>("product",newVal));
 		});
 		
 		this.searchClientFilter.textProperty().addListener((observable, oldVal, newVal) -> {
-			this.multiFilter.remove(oldVal);
-			this.multiFilter.add(newVal);
+			this.multiFilter.remove(new Pair<String, String>("client",oldVal));
+			this.multiFilter.add(new Pair<String, String>("client",newVal));
 		});
 		
-		//this.multiFilter
+		this.dateFrom.valueProperty().addListener((observable, oldVal, newVal) -> {
+			String oldVal2 = "";
+			if(oldVal != null) {
+				oldVal2 = oldVal.toString();
+			}
+			
+			System.out.println(oldVal + "vvvvvvv");
+			this.multiFilter.remove(new Pair<String, String>("dateFrom",oldVal2));
+			this.multiFilter.add(new Pair<String, String>("dateFrom",newVal.toString()));
+		});
+		
+		this.dateTo.valueProperty().addListener((observable, oldVal, newVal) -> {
+			String oldVal2 = "";
+			if(oldVal != null) {
+				oldVal2 = oldVal.toString();
+			}
+			
+			this.multiFilter.remove(new Pair<String, String>("dateTo",oldVal2));
+			this.multiFilter.add(new Pair<String, String>("dateTo",newVal.toString()));
+		});
+		
+		this.multiFilter.addListener((Change<? extends Pair<String, String>> change)->{
+			while(change.next()) {
+				if(change.wasAdded()) {
+					this.filteredRentList.setPredicate(rent -> {
+						return FilterHelpers.multiFilter(rent, change.getList());
+					});
+				}
+			}
+		});
+		
 		
 	}
 	
@@ -127,47 +148,58 @@ public class OverView {
 	{
 		this.filterContainer = new GridPane();
 		
-		Label separatorLabel1= new Label(" : ");
-		separatorLabel1.getStyleClass().addAll("filter-label");
+		Label fromLabel = new Label("Von");
+		fromLabel.getStyleClass().addAll("filter-label");
+		Label separator1 = new Label(":");
+		separator1.getStyleClass().addAll("filter-label");
+
+		Label toLabel = new Label("Bis");
+		toLabel.getStyleClass().addAll("filter-label");
+		Label separator2 = new Label(":");
+		separator2.getStyleClass().addAll("filter-label");
 		
-		Label separatorLabel2= new Label(" : ");
-		separatorLabel2.getStyleClass().addAll("filter-label");
-		
-		
-		Label categoryFilterLabel= new Label("Produktkategorie");
-		categoryFilterLabel.getStyleClass().addAll("filter-label");
-		
-		Label statusFilterLabel = new Label("Verfübarkeit");
-		statusFilterLabel.getStyleClass().addAll("filter-label");
 
 		this.filterContainer = new GridPane( );
 		
 		ColumnConstraints col1 = new ColumnConstraints();
-		col1.setPercentWidth(25);
+		col1.setPercentWidth(8);
 		ColumnConstraints col2 = new ColumnConstraints();
-		col2.setPercentWidth(5);
+		col2.setPercentWidth(2);
 		ColumnConstraints col3 = new ColumnConstraints();
-		col3.setPercentWidth(30);
+		col3.setPercentWidth(35);
 		ColumnConstraints col4 = new ColumnConstraints();
-		col4.setPercentWidth(40);
-		
-		filterContainer.getColumnConstraints().addAll(col1, col2, col3, col4);
+		col4.setPercentWidth(10);
+		ColumnConstraints col5 = new ColumnConstraints();
+		col5.setPercentWidth(8);
+		ColumnConstraints col6 = new ColumnConstraints();
+		col6.setPercentWidth(2);
+		ColumnConstraints col7 = new ColumnConstraints();
+		col7.setPercentWidth(35);
+		//filterContainer.getStyleClass().addAll("border");
+		//filterContainer.setStyle("-fx-grid-lines-visible: true");
+		filterContainer.getColumnConstraints().addAll(col1, col2, col3, col4, col5, col6, col7);
 		filterContainer.setHgap(5);
 		filterContainer.setVgap(5);
 		
-		filterContainer.add(categoryFilterLabel, 0, 0, 1, 1);
-		filterContainer.add(separatorLabel1, 1, 0, 1, 1);
-		filterContainer.add(this.categoryFilter, 2, 0, 1, 1);
+		GridPane.setHalignment(this.searchClientFilter, HPos.LEFT);
+		filterContainer.add(this.searchClientFilter, 0, 0, 3, 1);
 		
-		filterContainer.add(statusFilterLabel, 0, 1, 1, 1);
-		filterContainer.add(separatorLabel2, 1, 1, 1, 1);
-		filterContainer.add(this.statusFilter, 2, 1, 1, 1);
-
-		GridPane.setHalignment(this.searchClientFilter, HPos.RIGHT);
-		filterContainer.add(this.searchClientFilter, 3, 2, 1, 1);
+		filterContainer.add(new Label(""), 3, 0, 1, 1);
 
 		GridPane.setHalignment(this.searchProductFilter, HPos.RIGHT);
-		filterContainer.add(this.searchProductFilter, 3, 3, 1, 1);
+		filterContainer.add(this.searchProductFilter, 4, 0, 3, 1);
+		
+		filterContainer.add(fromLabel, 0, 1, 1, 1);
+		filterContainer.add(separator1, 1, 1, 1, 1);
+		filterContainer.add(this.dateFrom, 2, 1, 1, 1);
+		
+		filterContainer.add(new Label(""), 3, 1, 1, 1);
+		
+		filterContainer.add(toLabel, 4, 1, 1, 1);
+		filterContainer.add(separator2, 5, 1, 1, 1);
+		filterContainer.add(this.dateTo, 6, 1, 1, 1);
+		
+		filterContainer.add(new Label(""), 0, 2, 7, 1);
 	}
 	
 	public void buildTabView()
