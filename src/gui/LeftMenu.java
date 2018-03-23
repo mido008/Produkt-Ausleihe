@@ -11,41 +11,60 @@ import main.Leihaus;
 public class LeftMenu {
 	
 	final Button overViewBt;
-	final Button clientBt;
-	final Button productBt;
-	final Button rentBt;
-	final Button backBt;
+	final Button clientsBt;
+	final Button productsBt;
+	final Button categoriestBt;
+	final Button rentsBt;
+	final Button backsBt;
 
+	/**
+	 * Constructor for the GUI LeftMenu
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public LeftMenu(MainContainer relatedContainer){
 		this.overViewBt = new Button("Übersicht");
-		this.clientBt = new Button("Kunden");
-		this.productBt = new Button("Produkt");
-		this.rentBt = new Button("Ausleihe");
-		this.backBt = new Button("Rückgabe");
+		this.clientsBt = new Button("Kunden");
+		this.productsBt = new Button("Produkte");
+		this.categoriestBt = new Button("Kategorien");
+		this.rentsBt = new Button("Ausleihe");
+		this.backsBt = new Button("Rückgabe");
 		
 		this.initButtonHandles(relatedContainer);
 		this.initMenu();
 	};
 	
+	/**
+	 * Initialize the Left Menu style items
+	 */
 	public void initMenu()
 	{
 		overViewBt.getStyleClass().addAll("btn", "spacing-15");
-		clientBt.getStyleClass().addAll("btn", "spacing-15");
-		productBt.getStyleClass().addAll("btn", "spacing-15");
-		rentBt.getStyleClass().addAll("btn", "spacing-15");
-		backBt.getStyleClass().addAll("btn", "spacing-15");
+		clientsBt.getStyleClass().addAll("btn", "spacing-15");
+		productsBt.getStyleClass().addAll("btn", "spacing-15");
+		categoriestBt.getStyleClass().addAll("btn", "spacing-15");
+		rentsBt.getStyleClass().addAll("btn", "spacing-15");
+		backsBt.getStyleClass().addAll("btn", "spacing-15");
 	}
 	
+	/**
+	 * Initialize the left menu Buttons 
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void initButtonHandles(MainContainer relatedContainer)
 	{
-		this.initOverViewBtHandle(relatedContainer);
-		this.initClientBtHandle(relatedContainer);
-		this.initProduktBtHandle(relatedContainer);
-		this.initRentBtHandle(relatedContainer);
-		this.initBackBtHandle(relatedContainer);
+		this.initOverViewBtEventHandle(relatedContainer);
+		this.initClientsBtEventHandle(relatedContainer);
+		this.initProduktsBtEventHandle(relatedContainer);
+		this.initCategoriestBtEventHandle(relatedContainer);
+		this.initRentsBtEventHandle(relatedContainer);
+		this.initBacksBtEventHandle(relatedContainer);
 	}
 	
-	public void initOverViewBtHandle(MainContainer relatedContainer)
+	/**
+	 * Initial the EventHandler for the overView Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initOverViewBtEventHandle(MainContainer relatedContainer)
 	{
 		this.overViewBt.setOnAction(action -> {
 			OverView overView;
@@ -58,9 +77,13 @@ public class LeftMenu {
 		});
 	}
 	
-	public void initClientBtHandle(MainContainer relatedContainer)
+	/**
+	 * Initial the EventHandler for the Clients Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initClientsBtEventHandle(MainContainer relatedContainer)
 	{
-		this.clientBt.setOnAction(action -> {
+		this.clientsBt.setOnAction(action -> {
 			ClientOverView clientOverView;
 			try {
 				clientOverView = new ClientOverView(relatedContainer);
@@ -73,9 +96,13 @@ public class LeftMenu {
 		});
 	}
 	
-	public void initProduktBtHandle(MainContainer relatedContainer)
+	/**
+	 * Initial the EventHandler for the products Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initProduktsBtEventHandle(MainContainer relatedContainer)
 	{
-		this.productBt.setOnAction(action -> {
+		this.productsBt.setOnAction(action -> {
 			ProductOverView productOverview;
 			try {
 				productOverview = new ProductOverView(relatedContainer);
@@ -87,9 +114,31 @@ public class LeftMenu {
 		
 	}
 	
-	public void initRentBtHandle(MainContainer relatedContainer)
+	/**
+	 * Initial the EventHandler for the categories Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initCategoriestBtEventHandle(MainContainer relatedContainer)
 	{
-		this.rentBt.setOnAction(action -> {
+		this.categoriestBt.setOnAction(action -> {
+			CategoryOverView categoriesOverview;
+			try {
+				categoriesOverview = new CategoryOverView(relatedContainer);
+				relatedContainer.setContent(categoriesOverview.getView());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		
+	}
+	
+	/**
+	 * Initial the EventHandler for the rents Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initRentsBtEventHandle(MainContainer relatedContainer)
+	{
+		this.rentsBt.setOnAction(action -> {
 			RentOverview rentOverview;
 			try {
 				rentOverview = new RentOverview(relatedContainer);
@@ -101,9 +150,13 @@ public class LeftMenu {
 		
 	}
 	
-	public void initBackBtHandle(MainContainer relatedContainer)
+	/**
+	 * Initial the EventHandler for the returns Button
+	 * @param relatedContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
+	public void initBacksBtEventHandle(MainContainer relatedContainer)
 	{
-		this.backBt.setOnAction(action ->{
+		this.backsBt.setOnAction(action ->{
 			ReturnOverView returnOverview;
 			try {
 				returnOverview = new ReturnOverView(relatedContainer);
@@ -114,8 +167,12 @@ public class LeftMenu {
 		});
 	}
 	
+	/**
+	 * Initialize the final GUI for the left menu
+	 * @return : Group of elements
+	 */
 	public VBox getLeftMenu() {
-		VBox vbox = new VBox(this.overViewBt, this.clientBt, this.productBt, this.rentBt, this.backBt);
+		VBox vbox = new VBox(this.overViewBt, this.clientsBt, this.productsBt, this.categoriestBt, this.rentsBt, this.backsBt);
 		vbox.getStyleClass().add("left-menu");
 		return vbox;
 	}

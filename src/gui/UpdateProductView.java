@@ -26,30 +26,49 @@ public class UpdateProductView {
 	TextField preis;
 	ChoiceBox<Category> category;
 	
-	public UpdateProductView(MainContainer mainContainer){
+	/**
+	 * Constructor for the GUI UpdateProductView
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
+	public UpdateProductView(MainContainer mainContainer) throws SQLException, Exception{
 		this.product = new ProductDetails();
 		this.initView(mainContainer);
 	}
 	
-	public UpdateProductView(ProductDetails product ,MainContainer mainContainer) {
+	/**
+	 * Constructor for the GUI UpdateProductView
+	 * @param product : product Object
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
+	public UpdateProductView(ProductDetails product ,MainContainer mainContainer) throws SQLException, Exception {
 		this.product = product;
 		this.initView(mainContainer);
 	}
 	
-	public void initView(MainContainer mainContainer)
+	/**
+	 * Initialize the GUI for a product View
+	 * @param mainContainer: is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
+	public void initView(MainContainer mainContainer) throws SQLException, Exception
 	{
 		this.buildTitle();
 		this.buildForm();
 		this.buildFooter(mainContainer);
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Neues Produkt");
 		this.title.getStyleClass().add("head-title");
 	}
 	
-	public void buildForm()
+	/**
+	 * Build the Form GUI for a product
+	 */
+	public void buildForm() throws SQLException, Exception
 	{
 		this.productLabel = new TextField();
 		this.productLabel.setPromptText("Vorname");
@@ -62,7 +81,7 @@ public class UpdateProductView {
 		this.preis.getStyleClass().addAll("input", "spacing-5");
 		
 		this.category = new ChoiceBox<Category>();
-		this.category.getItems().addAll(Leihaus.categoriesList);
+		this.category.getItems().addAll(Leihaus.db.getCategories());
 		this.category.getSelectionModel().select(0);
 		this.category.getStyleClass().addAll("select-option", "spacing-5");
 		
@@ -70,6 +89,10 @@ public class UpdateProductView {
 		this.form.getStyleClass().addAll("input-form");
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
 	public void buildFooter(MainContainer mainContainer)
 	{
 		Button save = new Button("Speichern");
@@ -78,19 +101,22 @@ public class UpdateProductView {
 		save.getStyleClass().addAll("btn", "spacing-15");
 		cancel.getStyleClass().addAll("btn", "spacing-15");
 		
+		/* Initialize the EventHandler for save Button*/
 		save.setOnAction(action -> {
 			try {
-				if(this.product.getProductId() == 0) {
+				if(this.product.getProductId() == 0) { // add product
 					Leihaus.db.addProduct(this.saveProduct());
-				} else {
+				} else { // update product
 					Leihaus.db.updateProduct(this.saveProduct());
 				}
+				// change the GUI view
 				mainContainer.setContent(new ProductOverView(mainContainer).getView());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 		
+		/* Initialize the EventHandler for cancel Button*/
 		cancel.setOnAction(action -> {
 			try {
 				mainContainer.setContent(new ProductOverView(mainContainer).getView());
@@ -100,9 +126,13 @@ public class UpdateProductView {
 		});
 		
 		this.footer = new HBox(save, cancel);
-		this.footer.getStyleClass().add("table-view-footer");
+		this.footer.getStyleClass().addAll("table-view-footer", "align-center");
 	}	
 	
+	/**
+	 * Prepare the save function
+	 * @return
+	 */
 	public ProductDetails saveProduct()
 	{
 		this.product.setProductname(this.productLabel.getText());
@@ -111,6 +141,10 @@ public class UpdateProductView {
 		return this.product;
 	}
 	
+	/**
+	 * Initialize the final GUI for the UpdateProductView
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		VBox vbox = new VBox(this.title, this.form, this.footer);

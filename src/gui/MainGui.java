@@ -15,22 +15,27 @@ import javafx.stage.Stage;
 
 public class MainGui{
 	
+	/**
+	 * Initialize the GUI Window 
+	 */
 	public void initMainGui(Stage stage) throws SQLException, Exception {
 
-		final MainContainer mainContainer = new MainContainer();
-		final LeftMenu leftMenu = new LeftMenu(mainContainer);
-		OverView overView = new OverView(mainContainer);
-		ClientOverView clientOverView = new ClientOverView(mainContainer);
-		ProductOverView productOverview= new ProductOverView(mainContainer);
+		final MainContainer mainContainer = new MainContainer(); // right main container
+		final LeftMenu leftMenu = new LeftMenu(mainContainer); // left menu container
+		
+		OverView overView = new OverView(mainContainer); // initialize the OverView as a default View
 		
 		mainContainer.setContent(overView.getView());
 		
+		/* Set the Left menu */
 		final HBox parentContainer = new HBox(leftMenu.getLeftMenu(), mainContainer.getMainContainer());
 		
 		parentContainer.getStyleClass().add("parent-container");
 		
+		/* Initialize the Scene*/
 		Scene scene = new Scene(parentContainer, 900, 600);
-		scene.getStylesheets().add("/assets/styles/style.css");
+		scene.getStylesheets().clear();
+		scene.getStylesheets().add("/assets/styles/style.css"); // Initilize the global style
 		
 		stage.setScene(scene);
 		stage.sizeToScene();

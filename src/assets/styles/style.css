@@ -115,3 +115,7 @@
 .text-white{
 	-fx-text-fill: white;
 }
+
+.dialog-pane:no-header .graphic-container{
+	-fx-padding: 20px;
+}

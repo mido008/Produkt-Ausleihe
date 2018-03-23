@@ -1,15 +1,12 @@
 package gui;
 
 import javafx.scene.control.Button;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.Group;
 import javafx.scene.layout.VBox;
 import main.Leihaus;
 import javafx.scene.layout.HBox;
-
-import java.sql.SQLException;
 
 import client.Client;
 
@@ -25,16 +22,29 @@ public class UpdateClientView {
 	TextField city;
 	TextField tel;
 	
+	/**
+	 * Constructor for the GUI UpdateClientView
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
 	public UpdateClientView(MainContainer mainContainer) {
 		this.client = new Client();
 		this.initView(mainContainer);
 	}
 	
+	/**
+	 * Constructor for the GUI UpdateClientView
+	 * @param client : client Object
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
 	public UpdateClientView(Client client ,MainContainer mainContainer) {
 		this.client = client;
 		this.initView(mainContainer);
 	}
 	
+	/**
+	 * Initialize the GUI for a client View
+	 * @param mainContainer: is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
 	public void initView(MainContainer mainContainer)
 	{
 		this.buildTitle();
@@ -42,12 +52,18 @@ public class UpdateClientView {
 		this.buildFooter(mainContainer);
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Neuer Kunde");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Build the Form GUI for a client
+	 */
 	public void buildForm()
 	{
 		this.firstname = new TextField();
@@ -84,6 +100,10 @@ public class UpdateClientView {
 		this.form.getStyleClass().addAll("input-form");
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Title, Filter, TableView and Filter
+	 */
 	public void buildFooter(MainContainer mainContainer)
 	{
 		Button save = new Button("Speichern");
@@ -92,28 +112,22 @@ public class UpdateClientView {
 		save.getStyleClass().addAll("btn", "spacing-15");
 		cancel.getStyleClass().addAll("btn", "spacing-15");
 		
+		/* Initialize the EventHandler for save Button*/
 		save.setOnAction(action -> {
-			if(this.client.getId() == 0) {
-				try {
-					Leihaus.db.addClient(this.saveClient());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} else {
-				try {
-					Leihaus.db.updateClient(this.saveClient());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			
 			try {
+				if(this.client.getId() == 0) {  // add clien
+					Leihaus.db.addClient(this.saveClient());
+				} else { // update client
+					Leihaus.db.updateClient(this.saveClient());
+				}
+				// change the GUI view
 				mainContainer.setContent(new ClientOverView(mainContainer).getView());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 		
+		/* Initialize the EventHandler for cancel Button*/
 		cancel.setOnAction(action -> {
 			try {
 				mainContainer.setContent(new ClientOverView(mainContainer).getView());
@@ -123,9 +137,13 @@ public class UpdateClientView {
 		});
 		
 		this.footer = new HBox(save, cancel);
-		this.footer.getStyleClass().add("table-view-footer");
+		this.footer.getStyleClass().addAll("table-view-footer", "align-center");
 	}
 	
+	/**
+	 * Prepare the save function
+	 * @return
+	 */
 	public Client saveClient()
 	{
 		this.client.setFirstname(this.firstname.getText());
@@ -138,6 +156,10 @@ public class UpdateClientView {
 		return this.client;
 	}
 	
+	/**
+	 * Initialize the final GUI for the UpdateClientView
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		VBox vbox = new VBox(this.title, this.form, this.footer);

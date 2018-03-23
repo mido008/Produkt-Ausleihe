@@ -2,6 +2,9 @@ package client;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
+/**
+ * Class Client 
+ */
 public class Client {
 	private SimpleIntegerProperty id;
 	private SimpleStringProperty firstname;
@@ -11,6 +14,9 @@ public class Client {
 	private SimpleStringProperty city;
 	private SimpleStringProperty tel;
 	
+	/**
+	 * Constructor
+	 */
 	public Client() {
 		this.id = new SimpleIntegerProperty();
 		this.firstname = new SimpleStringProperty();
@@ -20,6 +26,17 @@ public class Client {
 		this.city = new SimpleStringProperty();
 		this.tel = new SimpleStringProperty();
 	}
+	
+	/**
+	 * Constructor
+	 * @param id : client Id
+	 * @param firstname : client name
+	 * @param lastname : client last name
+	 * @param address : client address
+	 * @param plz : client plz
+	 * @param city : client city
+	 * @param tel : client telephone number
+	 */
 	public Client(int id, String firstname, String lastname, String address, String plz, String city, String tel)
 	{
 		this.id = new SimpleIntegerProperty(id);
@@ -31,11 +48,17 @@ public class Client {
 		this.tel = new SimpleStringProperty(tel);
 	}
 
+	/**
+	 * @return client Id
+	 */
 	public int getId()
 	{
 		return this.id.get();
 	}
 	
+	/**
+	 * @param id : client Id
+	 */
 	public void setId(int id)
 	{
 		this.id.setValue(id);
@@ -102,6 +125,10 @@ public class Client {
 		this.tel.setValue(tel);
 	}
 	
+	/**
+	 * Parse the client Object to a string for the DB Request (update or create)
+	 * @return String
+	 */
 	public String parseClientToDB()
 	{
 		return 	"'" + this.firstname.get() + "' ,"+

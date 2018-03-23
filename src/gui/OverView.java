@@ -1,5 +1,7 @@
 package gui;
 
+import java.sql.SQLException;
+
 import buttonHandlers.FilterHelpers;
 import buttonHandlers.Helpers;
 import client.Client;
@@ -32,7 +34,7 @@ import product.Status;
 
 public class OverView {
 
-	MainContainer mainContainer;
+	public MainContainer mainContainer;
 	Label title;
 	TextField searchClientFilter;
 	TextField searchProductFilter;
@@ -50,6 +52,10 @@ public class OverView {
 	public ObservableList<Rent> rentList = FXCollections.observableArrayList();
 	private FilteredList<Rent> filteredRentList = new FilteredList<>(this.rentList, rent -> true);
 	
+	/**
+	 * Constructor for the GUI OverView
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public OverView(MainContainer mainContainer)
 	{
 		try {
@@ -64,12 +70,18 @@ public class OverView {
 		this.buildFooter();
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Übersicht");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Prepare the filter elements
+	 */
 	public void buildFilter()
 	{
 		this.searchClientFilter = new TextField();
@@ -84,21 +96,10 @@ public class OverView {
 		this.buildFiterView();
 	}
 	
+	/**
+	 * Initialize the Filter EventHandler for filter fields
+	 */
 	public void buildFilterHandler() {
-		this.searchClientFilter.textProperty().addListener((observable, oldVal, newVal) -> {
-			this.filteredRentList.setPredicate(rent -> {
-				
-				if(newVal == null || newVal.isEmpty()) {
-					return true;
-				}
-				
-				if(rent.getClientname().toLowerCase().contains(newVal.toLowerCase())) {
-					return true;
-				}
-				
-				return false;
-			});
-		});
 		
 		this.searchProductFilter.textProperty().addListener((observable, oldVal, newVal) -> {
 			this.multiFilter.remove(new Pair<String, String>("product",oldVal));
@@ -131,6 +132,7 @@ public class OverView {
 			this.multiFilter.add(new Pair<String, String>("dateTo",newVal.toString()));
 		});
 		
+		
 		this.multiFilter.addListener((Change<? extends Pair<String, String>> change)->{
 			while(change.next()) {
 				if(change.wasAdded()) {
@@ -141,9 +143,13 @@ public class OverView {
 			}
 		});
 		
+		this.multiFilter.add(new Pair<String, String>("status","ausgeliehen"));
 		
 	}
 	
+	/**
+	 * Prepare the filter View
+	 */
 	public void buildFiterView()
 	{
 		this.filterContainer = new GridPane();
@@ -202,6 +208,9 @@ public class OverView {
 		filterContainer.add(new Label(""), 0, 2, 7, 1);
 	}
 	
+	/**
+	 * Initialize the products list TableView
+	 */
 	public void buildTabView()
 	{
 		TableColumn clientCol = new TableColumn("Kunde");
@@ -224,17 +233,25 @@ public class OverView {
 		this.rentTableView.getColumns().addAll(clientCol,productCol, preisCol, daysCol, dateFromCol, dateToCol);
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void buildFooter()
 	{
 		this.showDetails = new Button("Details");
 		this.showDetails.getStyleClass().addAll("btn", "spacing-15");
 		this.showDetails.disableProperty().bind(Bindings.isEmpty(this.rentTableView.selectionModelProperty().get().getSelectedCells()));
-		//Helpers.createInvoice(this.showDetails, this);
+		Helpers.showRentDetails(this.showDetails, this);
 		
 		this.footer = new HBox(this.showDetails);
 		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
 	}
 	
+	/**
+	 * Initialize the final GUI for the over view
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		GridPane gPane = new GridPane();

@@ -1,5 +1,7 @@
 package gui;
 
+import java.sql.SQLException;
+
 import buttonHandlers.Helpers;
 import client.Client;
 import javafx.beans.binding.Bindings;
@@ -46,10 +48,20 @@ public class InvoiceView {
 	public ObservableList<ProductDetails> productList = FXCollections.observableArrayList();
 	public FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
 	
-	
+	/**
+	 * Constructor for the GUI InvoiceView
+	 */
 	public InvoiceView()
 	{}
 	
+	/**
+	 * Constructor for the GUI InvoiceView
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 * @param client : client Object
+	 * @param productList : list of products
+	 * @throws SQLException : needed to throw errors from SQL
+	 * @throws Exception : needed to throw global errors
+	 */
 	public InvoiceView(Client client, ObservableList<ProductDetails> productList, MainContainer mainContainer)
 	{
 		this.mainContainer = mainContainer;
@@ -59,15 +71,21 @@ public class InvoiceView {
 		this.buildClientContainer();
 		this.buildProductsContainer();
 		this.buildFooter();
-		this.computeTotalPreis();
+		this.computeTotalPrice();
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Verleihbestätigung/Quittung");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Build the client label container
+	 */
 	public void buildClientContainer()
 	{
 		this.buildClientLabel();
@@ -96,6 +114,9 @@ public class InvoiceView {
 		clientContainer.add(this.clientLabel, 2, 0, 2, 1);
 	}
 	
+	/**
+	 * Build the products TableView container
+	 */
 	public void buildProductsContainer()
 	{
 		this.buildProductTableView();
@@ -129,6 +150,9 @@ public class InvoiceView {
 		this.clientLabel.getStyleClass().addAll("size-18","text-white");
 	}
 	
+	/**
+	 * Initialize the products list TableView
+	 */
 	public void buildProductTableView()
 	{
 		TableColumn productCol = new TableColumn("Produkt");
@@ -150,7 +174,10 @@ public class InvoiceView {
 		this.productsTableView.getStyleClass().add("client-over-view");
 	}
 
-	public void buildTotalPreisContainer()
+	/**
+	 * Build the total Price container
+	 */
+	public void buildTotalPriceContainer()
 	{
 		this.totalPreisContainer = new GridPane( );
 		Label totalLabel = new Label("Total");
@@ -183,15 +210,22 @@ public class InvoiceView {
 
 	}
 	
-	public void computeTotalPreis()
+	/**
+	 * Compute the Total price of an invoice
+	 */
+	public void computeTotalPrice()
 	{
 		this.totalPreis = (float) 0;
 		this.productList.forEach(item -> {
 			this.totalPreis += item.calculateTotal();
 		});
-		this.buildTotalPreisContainer();
+		this.buildTotalPriceContainer();
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void buildFooter()
 	{
 		this.printBt = new Button("Drücken");
@@ -203,6 +237,10 @@ public class InvoiceView {
 		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
 	}
 	
+	/**
+	 * Initialize the final GUI for the invoice over view
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		GridPane gPane = new GridPane();

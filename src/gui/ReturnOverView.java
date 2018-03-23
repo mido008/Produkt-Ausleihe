@@ -1,6 +1,8 @@
 package gui;
 
 
+import java.sql.SQLException;
+
 import buttonHandlers.Helpers;
 import client.Client;
 import javafx.beans.binding.Bindings;
@@ -20,6 +22,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import main.Leihaus;
 import product.Category;
 import product.ProductDetails;
 import product.Status;
@@ -46,7 +49,10 @@ public class ReturnOverView {
 	public ObservableList<ProductDetails> productList = FXCollections.observableArrayList();
 	public FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
 	
-	
+	/**
+	 * Constructor for the GUI ReturnOverView
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public ReturnOverView(MainContainer mainContainer) 
 	{
 		this.mainContainer = mainContainer;
@@ -59,17 +65,26 @@ public class ReturnOverView {
 		this.buildFooter();
 	}
 	
+	/**
+	 * Initialize the Selectoptions Buttons
+	 */
 	public void initSelectButtonsAction()
 	{
 		Helpers.selectClientForReturn(this.selectClient, this);
 	}
-	
+
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Produkt(e) ausleihen");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Build the client container
+	 */
 	public void buildClientContainer()
 	{
 		Label title = new Label("Kunde");
@@ -102,6 +117,9 @@ public class ReturnOverView {
 		}
 	}
 	
+	/**
+	 * Build the products TableView container
+	 */
 	public void buildProductsContainer()
 	{
 		this.buildProductTableView();
@@ -130,12 +148,18 @@ public class ReturnOverView {
 			
 	}
 	
+	/**
+	 * Build the client label
+	 */
 	public void buildClientLabel()
 	{
 		this.clientLabel.setText(this.clientList.get(0).getFirstname() + " " + this.clientList.get(0).getLastname());
 		this.clientLabel.getStyleClass().addAll("size-18","text-white");
 	}
 	
+	/**
+	 * Initialize the products list TableView
+	 */
 	public void buildProductTableView()
 	{
 		TableColumn productCol = new TableColumn("Produkt");
@@ -156,23 +180,55 @@ public class ReturnOverView {
 		this.productsTableView.getColumns().addAll(productCol, preisCol, daysCol, dateFromCol, dateToCol);
 	}
 	
+	/**
+	 * Rebuild the current GUI View
+	 */
 	public void rebuildView()
 	{
 		this.mainContainer.setContent(this.getView());
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void buildFooter()
 	{
 		this.returnProductBt = new Button("Rückgeben");
 		this.returnProductBt.getStyleClass().addAll("btn", "spacing-15");
+		this.returnProductBt.disableProperty().bind(Bindings.isEmpty(this.productsTableView.selectionModelProperty().get().getSelectedCells()));
 		
-		//Helpers.createInvoice(invoiceBt, this);
+		Helpers.returnProductBt(returnProductBt, this);
 		
 		this.footer = new HBox(this.returnProductBt);
 		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
 		this.footer.visibleProperty().bind(Bindings.size(this.clientList).isNotEqualTo(0));
 	}
 	
+	/**
+	 * Initialize the selected client 
+	 * @param clientId : client Id
+	 */
+	public void initClient(int clientId)
+	{
+		try {
+			Client client = Leihaus.db.getClientById(clientId);
+			this.clientList.clear();
+			this.clientList.add(client);
+			this.productList.clear();
+			this.productList.addAll(Leihaus.db.getRentedProductsByClient(client));
+			this.buildClientLabel();
+			this.buildClientContainer();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * Initialize the final GUI for the ReturnsOverView
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		GridPane gPane = new GridPane();

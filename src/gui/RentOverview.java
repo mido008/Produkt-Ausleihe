@@ -53,7 +53,10 @@ public class RentOverview {
 	public ObservableList<ProductDetails> productList = FXCollections.observableArrayList();
 	public FilteredList<ProductDetails> filteredProductList = new FilteredList<>(this.productList, productdetail -> true);
 	
-	
+	/**
+	 * Constructor for the GUI RentOverview
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public RentOverview(MainContainer mainContainer)
 	{
 		this.mainContainer = mainContainer;
@@ -68,27 +71,36 @@ public class RentOverview {
 		this.addProduct.getStyleClass().addAll("btn", "spacing-15");
 		this.saveBt = new Button("Speichern");
 		this.saveBt.getStyleClass().addAll("btn", "spacing-15");
-		this.computeTotalPreis();
+		this.computeTotalPrice();
 		this.initSelectButtonsAction();
 		this.buildTitle();
 		this.buildClientContainer();
 		this.buildProductsContainer();
-		this.buildTotalPreisContainer();
+		this.buildTotalPriceContainer();
 		this.buildFooter();
 	}
 	
+	/**
+	 * Initialize the Selectoptions Buttons
+	 */
 	public void initSelectButtonsAction()
 	{
 		Helpers.selectClientForRent(this.selectClient, this);
 		Helpers.selecProductForRent(this.addProduct, this);
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Produkt(e) ausleihen");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Build the client label container
+	 */
 	public void buildClientContainer()
 	{
 		Label title = new Label("Kunde");
@@ -121,6 +133,9 @@ public class RentOverview {
 		}
 	}
 	
+	/**
+	 * Build the products Table View container 
+	 */
 	public void buildProductsContainer()
 	{
 		this.buildProductTableView();
@@ -149,12 +164,18 @@ public class RentOverview {
 			
 	}
 	
+	/**
+	 * Initialize the client label
+	 */
 	public void buildClientLabel()
 	{
 		this.clientLabel.setText(this.clientList.get(0).getFirstname() + " " + this.clientList.get(0).getLastname());
 		this.clientLabel.getStyleClass().addAll("size-18","text-white");
 	}
 	
+	/**
+	 * Initialize the products list TableView
+	 */
 	public void buildProductTableView()
 	{
 		TableColumn productCol = new TableColumn("Produkt");
@@ -177,7 +198,10 @@ public class RentOverview {
 		
 	}
 	
-	public void buildTotalPreisContainer()
+	/**
+	 * Initialize the container of total preice
+	 */
+	public void buildTotalPriceContainer()
 	{
 		this.totalPreisContainer = new GridPane( );
 		Label totalLabel = new Label("Total");
@@ -210,6 +234,10 @@ public class RentOverview {
 
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void buildFooter()
 	{
 		this.saveBt.disableProperty().bind(Bindings.or(Bindings.size(this.productList).isEqualTo(0), Bindings.size(this.clientList).isEqualTo(0)));
@@ -224,20 +252,30 @@ public class RentOverview {
 		this.footer.getStyleClass().addAll("table-view-footer", "align-right");
 	}
 	
-	public void computeTotalPreis()
+	/**
+	 * Compute the Total price 
+	 */
+	public void computeTotalPrice()
 	{
 		this.totalPreis = (float) 0;
 		this.productList.forEach(item -> {
 			this.totalPreis += item.calculateTotal();
 		});
-		this.buildTotalPreisContainer();
+		this.buildTotalPriceContainer();
 	}
 	
+	/**
+	 * Rebuild the current GUI View
+	 */
 	public void rebuildView()
 	{
 		this.mainContainer.setContent(this.getView());
 	}
 	
+	/**
+	 * Initialize the final GUI for the RentOverView
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		GridPane gPane = new GridPane();
@@ -263,6 +301,9 @@ public class RentOverview {
 		return new Group(gPane);
 	}
 	
+	/**
+	 * render the invoice view
+	 */
 	public void renderInvoiceView()
 	{
 		InvoiceView invoiceView = new InvoiceView(this.clientList.get(0), this.productList, this.mainContainer);

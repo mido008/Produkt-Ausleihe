@@ -1,9 +1,8 @@
 package gui;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Optional;
 
+import buttonHandlers.FilterHelpers;
 import buttonHandlers.Helpers;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -11,22 +10,18 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.HPos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.Group;
-import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 import main.Leihaus;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import client.Client;
-import db.DB;
 
 public class ClientOverView {
 	
@@ -40,41 +35,84 @@ public class ClientOverView {
 	public ObservableList<Client> clientsList = FXCollections.observableArrayList();
 	private FilteredList<Client> filteredClientList = new FilteredList<>(this.clientsList, cl -> true);
 	
+	/**
+	 * Constructor for the GUI ClientOverView
+	 * @throws SQLException : needed to throw errors from SQL
+	 * @throws Exception : needed to throw global errors
+	 */
 	public ClientOverView() throws SQLException, Exception
 	{
-		this.initClientList();
+		this.initClientList(null);
+		this.buildTitle();
+		this.buildFiter();
+		this.buildTabview();
+	}
+
+	/**
+	 * Constructor for the GUI ClientOverView
+	 * @param filter : contain key value of condition to get filtered clients from DB
+	 * @throws SQLException
+	 * @throws Exception
+	 */
+	public ClientOverView(Pair<String, String> filter) throws SQLException, Exception
+	{
+		this.initClientList(filter);
 		this.buildTitle();
 		this.buildFiter();
 		this.buildTabview();
 	}
 	
+	/**
+	 * Constructor for the GUI ClientOverView
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 * @throws SQLException : needed to throw errors from SQL
+	 * @throws Exception : needed to throw global errors
+	 */
 	public ClientOverView(MainContainer mainContainer) throws SQLException, Exception
 	{
 		this.initClientView(mainContainer);
 	}
 	
-	
+	/**
+	 * Initialize the overview GUI for the list of clients 
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 * @throws SQLException : needed to throw errors from SQL
+	 * @throws Exception : needed to throw global errors
+	 */
 	public void initClientView(MainContainer mainContainer) throws SQLException, Exception
 	{
-		this.initClientList();
+		this.initClientList(null);
 		this.buildTitle();
 		this.buildFiter();
 		this.buildTabview();
 		this.buildFooter(mainContainer);
 	}
-
-	public void initClientList() throws SQLException, Exception
+	
+	/**
+	 * Initialize the list of clients
+	 * Get all rented filtered clients from DB
+	 * @throws SQLException : needed to throw errors from SQL
+	 * @throws Exception : needed to throw global errors
+	 */
+	public void initClientList(Pair<String, String> filter) throws SQLException, Exception
 	{
 		clientsList.clear();
-		clientsList.addAll(Leihaus.db.getClients());
+		clientsList.addAll(Leihaus.db.getClients(filter));
+		
 	}
 	
+	/**
+	 * Build the title for GUI
+	 */
 	public void buildTitle()
 	{
 		this.title = new Label("Kunden");
 		this.title.getStyleClass().add("head-title");
 	}
 	
+	/**
+	 * Prepare the filter elements
+	 */
 	public void buildFiter()
 	{
 		this.filter = new TextField();
@@ -82,18 +120,9 @@ public class ClientOverView {
 		this.filter.getStyleClass().addAll("filter");
 		
 		this.filter.textProperty().addListener((observable, oldVal, newVal) -> {
+			
 			this.filteredClientList.setPredicate(client -> {
-				
-				if(newVal == null || newVal.isEmpty()) {
-					return true;
-				}
-				
-				if(client.getFirstname().toLowerCase().contains(newVal.toLowerCase()) || 
-					client.getLastname().toLowerCase().contains(newVal.toLowerCase())) {
-					return true;
-				}
-				
-				return false;
+				return FilterHelpers.clientNameFilter(client.getFirstname(), newVal);
 			});
 		});
 		
@@ -101,6 +130,9 @@ public class ClientOverView {
 		this.filterContainer.getStyleClass().addAll("filter-container", "spacing-15");
 	}
 	
+	/**
+	 * Initialize the clients list TableView
+	 */
 	public void buildTabview()
 	{
 		TableColumn firstNameCol = new TableColumn("Vormane");
@@ -123,6 +155,10 @@ public class ClientOverView {
 		this.tableView.getStyleClass().add("client-over-view");
 	}
 	
+	/**
+	 * Build the footer that contains action Buttons like add, edit and remove
+	 * @param mainContainer : is the main Panel which contain all elements like Titel, Filter, TableView and Filter
+	 */
 	public void buildFooter(MainContainer mainContainer)
 	{
 		Button newClientBt = new Button("Neuer Kunde");
@@ -145,6 +181,10 @@ public class ClientOverView {
 		this.footer.getStyleClass().addAll("table-view-footer", "align-center");
 	}
 	
+	/**
+	 * Initialize the final GUI for the product over view
+	 * @return : Group of elements
+	 */
 	public Group getView()
 	{
 		GridPane gPane = new GridPane();
@@ -167,6 +207,10 @@ public class ClientOverView {
 		return new Group(gPane);
 	}
 	
+	/**
+	 * Initialize the GUI of clients for the selection in Dialog panel
+	 * @return : Group of elements
+	 */
 	public Group getClientViewForSelectTableView()
 	{
 		GridPane gPane = new GridPane();
